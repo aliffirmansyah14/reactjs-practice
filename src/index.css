@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+html {
+	@apply font-sans;
+}
+
+html.dark body {
+	@apply bg-black text-white;
+}
