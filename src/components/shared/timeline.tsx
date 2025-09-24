@@ -44,33 +44,74 @@ const TimeLine = ({ orientation = "horizontal" }: TimeLineProps) => {
 			data-orientation={orientation}
 		>
 			{items.map((item, index) => (
-				<div
-					key={item.id}
-					className="group-data-[orientation=vertical]/timeline:even:ms-auto group-data-[orientation=vertical]/timeline:w-[calc(50%-1.5rem)] group-data-[orientation=horizontal]/timeline:ms-8 group-data-[orientation=horizontal]/timeline:sm:ms-32 odd:group-data-[orientation=vertical]/timeline:[&_[data-slot=separator]]:left-[calc(100%+1.5rem)] odd:group-data-[orientation=vertical]/timeline:[&_[data-slot=circle]]:left-[calc(100%+1rem)] even:group-data-[orientation=vertical]/timeline:[&_[data-slot=separator]]:-left-6 even:group-data-[orientation=vertical]/timeline:[&_[data-slot=circle]]:-left-8  group-data-[orientation=horizontal]/timeline:[&_[data-slot=separator]]:-left-6 group-data-[orientation=horizontal]/timeline:[&_[data-slot=circle]]:-left-8 odd:group-data-[orientation=vertical]/timeline:text-right flex-1 flex flex-col gap-0.5 pb-12 relative group/timeline-item"
-				>
-					<div className="text-muted-foreground font-medium text-sm group-data-[orientation=horizontal]/timeline:sm:-left-32 group-data-[orientation=horizontal]/timeline:sm:absolute">
-						{item.date}
-					</div>
-					<h3 className="text-sm font-semibold">{item.title}</h3>
-					<div className="text-muted-foreground text-sm group-data-[orientation=vertical]/timeline:hidden">
-						{item.description}
-					</div>
-					<div
-						data-slot="separator"
-						className={`w-[2px] absolute top-4 -translate-x-1/2 ${
-							index === items.length - 1 ? "hidden" : "h-[calc(100%-1rem)]"
-						} ${item.completed ? "bg-primary" : "bg-accent"}`}
-					></div>
-					<div
-						data-slot="circle"
-						className={`border-2 absolute  size-4 rounded-full ${
-							item.completed ? "border-primary" : "border-accent"
-						} `}
-					></div>
-				</div>
+				<TimelineContent key={item.id}>
+					<TimelineDate>{item.date}</TimelineDate>
+					<TimelineTitle>{item.title}</TimelineTitle>
+					<TimlineDescription>{item.description}</TimlineDescription>
+					<TimelineCircle isCompleted={item.completed} />
+					<TimelineSeparator
+						isCompleted={item.completed}
+						isLastest={index === items.length - 1}
+					/>
+				</TimelineContent>
 			))}
 		</div>
 	);
 };
 
 export default TimeLine;
+
+const TimelineContent = ({ children }: { children: React.ReactNode }) => {
+	return (
+		<div className="group-data-[orientation=vertical]/timeline:even:ms-auto group-data-[orientation=vertical]/timeline:w-[calc(50%-1.5rem)] group-data-[orientation=horizontal]/timeline:ms-8 group-data-[orientation=horizontal]/timeline:sm:ms-32 odd:group-data-[orientation=vertical]/timeline:[&_[data-slot=separator]]:left-[calc(100%+1.5rem)] odd:group-data-[orientation=vertical]/timeline:[&_[data-slot=circle]]:left-[calc(100%+1rem)] even:group-data-[orientation=vertical]/timeline:[&_[data-slot=separator]]:-left-6 even:group-data-[orientation=vertical]/timeline:[&_[data-slot=circle]]:-left-8  group-data-[orientation=horizontal]/timeline:[&_[data-slot=separator]]:-left-6 group-data-[orientation=horizontal]/timeline:[&_[data-slot=circle]]:-left-8 odd:group-data-[orientation=vertical]/timeline:text-right flex-1 flex flex-col gap-0.5 pb-12 relative group/timeline-item">
+			{children}
+		</div>
+	);
+};
+
+const TimelineDate = ({ children }: { children: React.ReactNode }) => {
+	return (
+		<div className="text-muted-foreground font-medium text-sm group-data-[orientation=horizontal]/timeline:sm:-left-32 group-data-[orientation=horizontal]/timeline:sm:absolute">
+			{children}
+		</div>
+	);
+};
+const TimelineTitle = ({ children }: { children: React.ReactNode }) => {
+	return <h3 className="text-sm font-semibold">{children}</h3>;
+};
+
+const TimlineDescription = ({ children }: { children: React.ReactNode }) => {
+	return (
+		<div className="text-muted-foreground text-sm group-data-[orientation=vertical]/timeline:hidden">
+			{children}
+		</div>
+	);
+};
+
+const TimelineSeparator = ({
+	isCompleted,
+	isLastest,
+}: {
+	isCompleted: boolean;
+	isLastest: boolean;
+}) => {
+	return (
+		<div
+			data-slot="separator"
+			className={`w-[2px] absolute top-4 -translate-x-1/2 ${
+				isLastest ? "hidden" : "h-[calc(100%-1rem)]"
+			} ${isCompleted ? "bg-primary" : "bg-accent"}`}
+		></div>
+	);
+};
+
+const TimelineCircle = ({ isCompleted }: { isCompleted: boolean }) => {
+	return (
+		<div
+			data-slot="circle"
+			className={`border-2 absolute  size-4 rounded-full ${
+				isCompleted ? "border-primary" : "border-accent"
+			} `}
+		></div>
+	);
+};
