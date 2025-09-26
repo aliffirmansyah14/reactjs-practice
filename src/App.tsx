@@ -6,6 +6,7 @@ import Loadingspinner from "./components/shared/loading-spinner";
 const FormOtpPage = lazy(() => import("@/pages/form-otp"));
 const CounterBoxPage = lazy(() => import("@/pages/counter-box"));
 const TimelinePage = lazy(() => import("@/pages/timeline"));
+const KanbanBoardPage = lazy(() => import("@/pages/kanban-board"));
 
 const App = () => {
 	return (
@@ -33,6 +34,14 @@ const App = () => {
 					element={
 						<Suspense fallback={<Loadingspinner />}>
 							<TimelinePage />
+						</Suspense>
+					}
+				/>
+				<Route
+					path="/kanban-board"
+					element={
+						<Suspense fallback={<Loadingspinner />}>
+							<KanbanBoardPage />
 						</Suspense>
 					}
 				/>

@@ -14,6 +14,10 @@ const links = [
 		href: "/timeline",
 		name: "Timeline",
 	},
+	{
+		href: "/kanban-board",
+		name: "Kanban Board",
+	},
 ];
 
 const Home = () => {
