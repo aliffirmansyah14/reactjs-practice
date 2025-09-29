@@ -1,13 +1,22 @@
 import { cn } from "@/lib/utils";
-import type { ColumnType, NoteItem, State } from "@/pages/kanban-board";
+import type { ColumnType, TaskType, State } from "@/pages/kanban-board";
 import { X } from "lucide-react";
 
 interface ColumnProps extends ColumnType {
 	id: keyof State;
-	onDraggStart: (task: NoteItem) => void;
+	itemDrag: {
+		columnId: keyof State;
+		task: TaskType;
+	} | null;
+	onDraggStart: (task: TaskType) => void;
 	onDraggEnd: (e: React.DragEvent, columnId: keyof State) => void;
 	onDraggOver: (e: React.DragEvent) => void;
-	onDelete: (task: NoteItem) => void;
+	onDelete: (task: TaskType) => void;
+	onDropSort: (
+		e: React.DragEvent,
+		index: number,
+		columnId: keyof State
+	) => void;
 }
 
 const styleColumn = {
@@ -23,6 +32,8 @@ const Column = ({
 	onDraggStart,
 	onDraggOver,
 	onDraggEnd,
+	onDropSort,
+	itemDrag,
 }: ColumnProps) => {
 	return (
 		<div
@@ -45,28 +56,36 @@ const Column = ({
 						Add task
 					</div>
 				) : (
-					items.map((item, index) => (
-						<div
-							key={index}
-							className="bg-input px-4 py-3 text-sm font-medium cursor-grab flex justify-between items-center"
-							onDragStart={e => {
-								e.dataTransfer.setData("text/plain", id);
-								onDraggStart(item);
-							}}
-							draggable
-						>
-							<span>{item.content}</span>
-							<button
-								onClick={e => {
-									e.stopPropagation();
-									onDelete(item);
+					items.map((item, index) => {
+						const isItemDrag = item.id === itemDrag?.task.id;
+						return (
+							<div
+								key={index}
+								className={`bg-input pr-4 py-3 text-sm font-medium cursor-grab flex justify-between items-center ${
+									isItemDrag ? "opacity-60" : ""
+								}`}
+								onDragStart={() => {
+									onDraggStart(item);
 								}}
-								className="[&_svg]:size-5 p-1 hover:bg-accent active:bg-accent rounded-full hover:cursor-pointer"
+								onDragOver={e => onDraggOver(e)}
+								onDrop={e => onDropSort(e, index, id)}
+								draggable
 							>
-								<X />
-							</button>
-						</div>
-					))
+								<div className="pl-4">
+									{item.content[0].toUpperCase() + item.content.slice(1)}
+								</div>
+								<button
+									onClick={e => {
+										e.stopPropagation();
+										onDelete(item);
+									}}
+									className="[&_svg]:size-5 p-1 hover:bg-accent active:bg-accent rounded-full hover:cursor-pointer"
+								>
+									<X />
+								</button>
+							</div>
+						);
+					})
 				)}
 			</div>
 		</div>

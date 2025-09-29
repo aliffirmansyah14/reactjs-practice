@@ -3,13 +3,13 @@ import InputColumn from "@/components/shared/kanban-board/input-column";
 import usePersistState from "@/hooks/usePersistState";
 import React, { useState } from "react";
 
-export type NoteItem = {
+export type TaskType = {
 	id: string;
 	content: string;
 };
 export type ColumnType = {
 	name: string;
-	items: Array<NoteItem>;
+	items: Array<TaskType>;
 };
 
 export type State = {
@@ -53,7 +53,7 @@ const KanbanBoardPage = () => {
 	const [activeColumn, setActiveColumn] = useState<keyof State>("todo");
 	const [dragItem, setDragItem] = useState<{
 		columnId: keyof State;
-		task: NoteItem;
+		task: TaskType;
 	} | null>(null);
 
 	const handleOnChangeInput = (value: string) => {
@@ -76,7 +76,7 @@ const KanbanBoardPage = () => {
 		setNewTask("");
 	};
 
-	const deleteTask = (columnId: keyof State, task: NoteItem) => {
+	const deleteTask = (columnId: keyof State, task: TaskType) => {
 		const updateColumns = { ...columns };
 		updateColumns[columnId].items = updateColumns[columnId].items.filter(
 			item => item.id !== task.id
@@ -85,22 +85,25 @@ const KanbanBoardPage = () => {
 		setColumns(updateColumns);
 	};
 
-	const handleDragStart = (columnId: keyof State, task: NoteItem) => {
+	const handleDragStart = (columnId: keyof State, task: TaskType) => {
 		setDragItem({ columnId, task });
 	};
 
-	const handleDragDrop = (e: React.DragEvent, columnId: keyof State) => {
+	const handleDragDropCclumn = (e: React.DragEvent, columnId: keyof State) => {
 		e.preventDefault();
 		// jika gk ada drag item return
 		if (!dragItem) return;
-		const droppedItemId = e.dataTransfer.getData("text/plain");
-		console.log(droppedItemId);
 
 		const { columnId: prevColumnId, task } = dragItem;
 		// kalo koloumnnya sama return
-		console.log({ columnId, prevColumnId });
-		if (prevColumnId === columnId) return;
+		if (prevColumnId === columnId) {
+			setDragItem(null);
+			return;
+		}
 		const updateColumns = { ...columns };
+
+		// kalo udh ada indexnya handlenya ke sort
+		// if (updateColumns[columnId].items.length > 0) return;
 		// hapus data di column lama
 		updateColumns[prevColumnId].items = updateColumns[
 			prevColumnId
@@ -111,6 +114,33 @@ const KanbanBoardPage = () => {
 		setDragItem(null);
 	};
 
+	const handleSortOnDrop = (
+		e: React.DragEvent,
+		insertIndex: number,
+		columnId: keyof State
+	) => {
+		e.preventDefault();
+		if (!dragItem) return;
+		const { columnId: prevColumnId, task } = dragItem;
+		const isSameColumn = columnId === prevColumnId;
+
+		if (!isSameColumn) {
+			setDragItem(null);
+			return;
+		}
+		const updateColumns = { ...columns };
+
+		// cari index item yang didragg
+		const oldItemIndex = updateColumns[columnId].items.findIndex(
+			note => note.id === task.id
+		);
+		// hapus dan ambil item drag
+		const [oldItem] = updateColumns[columnId].items.splice(oldItemIndex, 1);
+		// sisipkan item drag ke index yang di drop
+		updateColumns[columnId].items.splice(insertIndex, 0, oldItem);
+
+		setColumns(updateColumns);
+	};
 	const handleDragOver = (e: React.DragEvent) => {
 		e.preventDefault();
 	};
@@ -129,12 +159,14 @@ const KanbanBoardPage = () => {
 						<Column
 							key={column}
 							id={column as keyof State}
+							itemDrag={dragItem}
 							onDraggStart={task =>
 								handleDragStart(column as keyof State, task)
 							}
-							onDraggEnd={handleDragDrop}
+							onDraggEnd={handleDragDropCclumn}
 							onDraggOver={handleDragOver}
 							onDelete={task => deleteTask(column as keyof State, task)}
+							onDropSort={handleSortOnDrop}
 							{...columns[column as keyof State]}
 						/>
 					))}
